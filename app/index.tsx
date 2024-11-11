@@ -1,21 +1,14 @@
 import HomeEmptyView from "@/components/HomeEmptyView"
 import { ParentView, Text } from "@/components/StyledComponents"
+import FolderItem from "@/components/home/FolderItem"
 import { Colors } from "@/constants/colors"
 import { PARENT_PADDING, TAB_BAR_HEIGHT } from "@/constants/dimensions"
-import BottomSheet, { WINDOW_WIDTH } from "@gorhom/bottom-sheet"
-import { Image } from "expo-image"
-import { SquircleView } from "expo-squircle-view"
-import { useRef, useState } from "react"
-import { Pressable, ScrollView, View, useColorScheme } from "react-native"
-import Animated, {
-  FadeIn,
-  FadeOut,
-  LinearTransition,
-} from "react-native-reanimated"
+import { useState } from "react"
+import { ScrollView, View, useColorScheme } from "react-native"
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 export default function HomeScreen() {
-  const bottomSheetRef = useRef<BottomSheet>(null)
   const colorscheme = useColorScheme()
   const colors = Colors[colorscheme ?? "light"]
   const insets = useSafeAreaInsets()
@@ -62,49 +55,13 @@ export default function HomeScreen() {
               .fill(0)
               .map((_, index) => {
                 return (
-                  <Pressable
+                  <FolderItem
                     key={index}
+                    title="Cool Shit"
                     onPress={() => {
                       setArraySize(arraySize - 1)
                     }}
-                  >
-                    <Animated.View
-                      layout={LinearTransition}
-                      entering={FadeIn}
-                      exiting={FadeOut}
-                    >
-                      <SquircleView
-                        borderRadius={20}
-                        style={{
-                          height:
-                            WINDOW_WIDTH / 2 -
-                            PARENT_PADDING -
-                            PARENT_PADDING / 2,
-                          width:
-                            WINDOW_WIDTH / 2 -
-                            PARENT_PADDING -
-                            PARENT_PADDING / 2,
-                          overflow: "hidden",
-                          backgroundColor: colors.lightMutedText,
-                        }}
-                      >
-                        <Image
-                          source={require("../assets/images/img.jpeg")}
-                          contentFit="cover"
-                          style={{
-                            height:
-                              WINDOW_WIDTH / 2 -
-                              PARENT_PADDING -
-                              PARENT_PADDING / 2,
-                            width:
-                              WINDOW_WIDTH / 2 -
-                              PARENT_PADDING -
-                              PARENT_PADDING / 2,
-                          }}
-                        />
-                      </SquircleView>
-                    </Animated.View>
-                  </Pressable>
+                  />
                 )
               })}
           </View>
