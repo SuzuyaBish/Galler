@@ -2,6 +2,7 @@ import { Text } from "@/components/StyledComponents"
 import { Colors } from "@/constants/colors"
 import { PARENT_PADDING, WINDOW_WIDTH } from "@/constants/dimensions"
 import { BlurView } from "expo-blur"
+import * as Haptics from "expo-haptics"
 import { Image } from "expo-image"
 import { SquircleView } from "expo-squircle-view"
 import { FC } from "react"
@@ -20,7 +21,13 @@ const FolderItem: FC<FolderItemProps> = ({ ...props }) => {
   const colorscheme = useColorScheme()
   const colors = Colors[colorscheme ?? "light"]
   return (
-    <Pressable {...props}>
+    <Pressable
+      {...props}
+      className="transition-all duration-200 active:scale-95"
+      onPressIn={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+      }}
+    >
       <Animated.View
         layout={LinearTransition}
         entering={FadeIn}
