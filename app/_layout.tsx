@@ -5,6 +5,12 @@ import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
 import "react-native-reanimated"
 
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native"
+import { useColorScheme } from "react-native"
 import "react-native-gesture-handler"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import "react-native-reanimated"
@@ -12,8 +18,13 @@ import "react-native-reanimated"
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
+  const colorScheme = useColorScheme()
   const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    SatoshiLight: require("../assets/fonts/Satoshi/Satoshi-Light.otf"),
+    SatoshiRegular: require("../assets/fonts/Satoshi/Satoshi-Regular.otf"),
+    SatoshiMedium: require("../assets/fonts/Satoshi/Satoshi-Medium.otf"),
+    SatoshiBold: require("../assets/fonts/Satoshi/Satoshi-Bold.otf"),
+    SatoshiBlack: require("../assets/fonts/Satoshi/Satoshi-Black.otf"),
   })
 
   useEffect(() => {
@@ -27,13 +38,15 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </BottomSheetModalProvider>
-    </GestureHandlerRootView>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <BottomSheetModalProvider>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
+    </ThemeProvider>
   )
 }
