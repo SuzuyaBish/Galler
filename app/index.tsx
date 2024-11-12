@@ -1,22 +1,27 @@
-import HomeEmptyView from "@/components/HomeEmptyView"
-import { ParentView, Text } from "@/components/StyledComponents"
-import FolderItem from "@/components/home/FolderItem"
-import { Colors } from "@/constants/colors"
+import Header from "@/components/Header"
+import { ParentView } from "@/components/StyledComponents"
+import ListItem from "@/components/home/ListItem"
 import { PARENT_PADDING, TAB_BAR_HEIGHT } from "@/constants/dimensions"
 import { useState } from "react"
-import { ScrollView, View, useColorScheme } from "react-native"
+import { ScrollView, View } from "react-native"
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-export default function HomeScreen() {
-  const colorscheme = useColorScheme()
-  const colors = Colors[colorscheme ?? "light"]
-  const insets = useSafeAreaInsets()
-  const [arraySize, setArraySize] = useState(5)
+const folders = [{ id: 0, image: require("../assets/images/img.jpeg") }]
 
-  if (arraySize === 0) {
-    return <HomeEmptyView />
-  }
+const images = [
+  { id: 0, image: require("../assets/images/img.jpeg") },
+  { id: 1, image: require("../assets/images/img2.jpeg") },
+  { id: 2, image: require("../assets/images/img3.png") },
+]
+
+export default function HomeScreen() {
+  const insets = useSafeAreaInsets()
+  const [list, setList] = useState(folders)
+
+  // if (arraySize === 0) {
+  //   return <HomeEmptyView />
+  // }
 
   return (
     <Animated.View className="flex-1" entering={FadeIn} exiting={FadeOut}>
@@ -35,35 +40,27 @@ export default function HomeScreen() {
             paddingBottom: insets.bottom + TAB_BAR_HEIGHT,
           }}
         >
-          <View
-            className="flex flex-row items-center gap-x-3"
-            style={{ marginTop: 30 }}
-          >
-            <Text className="text-4xl" family="SatoshiBold">
-              Folders
-            </Text>
-            <View
-              className="size-4 rounded-full"
-              style={{ backgroundColor: colors.redColor }}
-            />
-          </View>
+          <Header
+            title={list === folders ? "Folders" : "Images"}
+            hasBackButton={list === images}
+            onBackPress={() => {
+              setList(folders)
+            }}
+          />
           <View
             className="mt-10 flex flex-row flex-wrap justify-between"
             style={{ rowGap: PARENT_PADDING }}
           >
-            {Array(arraySize)
-              .fill(0)
-              .map((_, index) => {
-                return (
-                  <FolderItem
-                    key={index}
-                    title="Cool Shit"
-                    onPress={() => {
-                      setArraySize(arraySize - 1)
-                    }}
-                  />
-                )
-              })}
+            {list.map((image) => {
+              return (
+                <ListItem
+                  key={image.id}
+                  title={list === folders ? "Cool" : undefined}
+                  image={image.image}
+                  onPress={() => setList(images)}
+                />
+              )
+            })}
           </View>
         </ScrollView>
       </ParentView>
