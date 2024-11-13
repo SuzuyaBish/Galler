@@ -23,7 +23,6 @@ export default function BottomActions() {
         paddingBottom: insets.bottom,
         height: TAB_BAR_HEIGHT,
       }}
-      className="absolute bottom-0 flex flex-row items-center justify-between pt-4"
     >
       <Pressable className="rounded-full px-2 py-3">
         <SearchIcon color={colors.icon} />

@@ -1,4 +1,6 @@
 import { Colors } from "@/constants/colors"
+import * as Haptics from "expo-haptics"
+import * as MediaLibrary from "expo-media-library"
 import { SquircleView } from "expo-squircle-view"
 import { ChevronLeftIcon } from "lucide-react-native"
 import React, { useState } from "react"
@@ -15,12 +17,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Text } from "../StyledComponents"
 import FolderIcon from "../icons/FolderIcon"
 import ImageIcon from "../icons/ImageIcon"
+import AlbumViewer from "./AlbumViewer"
 
 export default function CreateLanding() {
   const colorscheme = useColorScheme()
   const colors = Colors[colorscheme ?? "light"]
   const [pressed, setPressed] = useState(false)
   const insets = useSafeAreaInsets()
+  const [permissionResponse, requestPermission] = MediaLibrary.usePermissions()
 
   return (
     <Animated.View
@@ -64,6 +68,7 @@ export default function CreateLanding() {
           <ChevronLeftIcon color={"transparent"} size={28} strokeWidth={3} />
         </Animated.View>
       </Animated.View>
+      {pressed && <AlbumViewer />}
       {!pressed && (
         <Animated.View
           exiting={FadeOut}
@@ -112,7 +117,19 @@ export default function CreateLanding() {
         style={{
           marginTop: pressed ? "auto" : 0,
         }}
-        onPress={() => setPressed(!pressed)}
+        onPress={async () => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+
+          if (permissionResponse?.status !== "granted") {
+            const response = await requestPermission()
+
+            if (response.granted) {
+              setPressed(true)
+            }
+          } else {
+            setPressed(true)
+          }
+        }}
       >
         <SquircleView
           borderRadius={20}

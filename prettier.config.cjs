@@ -5,6 +5,6 @@ const config = {
   semi: false,
   singleQuote: false,
   plugins: ["prettier-plugin-organize-imports", "prettier-plugin-tailwindcss"],
-};
+}
 
-module.exports = config;
+module.exports = config
