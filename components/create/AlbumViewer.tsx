@@ -1,5 +1,7 @@
 import { PARENT_PADDING } from "@/constants/dimensions"
+import { createState$ } from "@/lib/store/create-store"
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet"
+import { observer } from "@legendapp/state/react"
 import * as MediaLibrary from "expo-media-library"
 import { FC, useEffect, useState } from "react"
 import { View } from "react-native"
@@ -8,16 +10,11 @@ import useSWR from "swr"
 import ListItem from "../home/ListItem"
 import AlbumItem from "./AlbumItem"
 
-interface AlbumViewerProps {
-  selectedAlbum: MediaLibrary.Album | null
-  setSelectedAlbum: (album: MediaLibrary.Album | null) => void
-}
-
-const AlbumViewer: FC<AlbumViewerProps> = ({
-  selectedAlbum,
-  setSelectedAlbum,
-}) => {
+const AlbumViewer: FC = () => {
   const insets = useSafeAreaInsets()
+  const selectedAlbum = createState$.selectedAlbum.get()
+  const selectedAssets = createState$.selectedAssets.get()
+
   const [assets, setAssets] =
     useState<MediaLibrary.PagedInfo<MediaLibrary.Asset>>()
 
@@ -43,6 +40,7 @@ const AlbumViewer: FC<AlbumViewerProps> = ({
     const assets = await MediaLibrary.getAssetsAsync({
       album: album,
       after: endCursor,
+      mediaType: ["video", "photo"],
     })
     return assets
   }
@@ -77,7 +75,9 @@ const AlbumViewer: FC<AlbumViewerProps> = ({
             <AlbumItem
               album={item}
               rowCount={2}
-              onPress={() => setSelectedAlbum(item)}
+              onPress={() => {
+                createState$.selectedAlbum.set(item)
+              }}
             />
           )}
         />
@@ -111,11 +111,26 @@ const AlbumViewer: FC<AlbumViewerProps> = ({
             justifyContent: "space-between",
             marginBottom: PARENT_PADDING,
           }}
-          renderItem={({ item }) => <ListItem image={item.uri} rowCount={3} />}
+          renderItem={({ item }) => (
+            <ListItem
+              image={item.uri}
+              rowCount={3}
+              isSelected={selectedAssets.includes(item)}
+              onPress={() => {
+                if (selectedAssets.includes(item)) {
+                  createState$.selectedAssets.set(
+                    selectedAssets.filter((a) => a !== item)
+                  )
+                } else {
+                  createState$.selectedAssets.set([...selectedAssets, item])
+                }
+              }}
+            />
+          )}
         />
       )}
     </View>
   )
 }
 
-export default AlbumViewer
+export default observer(AlbumViewer)

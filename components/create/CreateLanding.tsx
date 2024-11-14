@@ -1,7 +1,9 @@
 import { Colors } from "@/constants/colors"
+import { createState$ } from "@/lib/store/create-store"
+import { observer } from "@legendapp/state/react"
 import * as Haptics from "expo-haptics"
 import * as MediaLibrary from "expo-media-library"
-import React, { useState } from "react"
+import React from "react"
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import FolderIcon from "../icons/FolderIcon"
@@ -11,14 +13,10 @@ import CreateAction from "./CreateAction"
 import CreateHeader from "./CreateHeader"
 import CreateTitle from "./CreateTitle"
 
-export default function CreateLanding() {
+function CreateLanding() {
   const insets = useSafeAreaInsets()
-  const [selectedAction, setSelectedAction] = useState<
-    "folder" | "media" | undefined
-  >()
-  const [selectedAlbum, setSelectedAlbum] = useState<MediaLibrary.Album | null>(
-    null
-  )
+  const selectedAction = createState$.selectedAction.get()
+
   const [permissionResponse, requestPermission] = MediaLibrary.usePermissions()
 
   return (
@@ -27,45 +25,27 @@ export default function CreateLanding() {
       entering={FadeIn.delay(300)}
       className="flex-1 gap-y-2"
     >
-      <CreateHeader
-        selectedAction={selectedAction}
-        onBack={() => {
-          if (selectedAction === "media") {
-            if (selectedAlbum) {
-              setSelectedAlbum(null)
-            } else {
-              setSelectedAction(undefined)
-            }
-          }
-        }}
-      />
+      <CreateHeader />
 
-      {selectedAction === "media" && (
-        <AlbumViewer
-          selectedAlbum={selectedAlbum}
-          setSelectedAlbum={setSelectedAlbum}
-        />
-      )}
+      {selectedAction === "media" && <AlbumViewer />}
 
-      <CreateTitle canShow={!selectedAction} />
+      <CreateTitle canShow={selectedAction !== "step1"} />
 
-      {!selectedAction && (
+      {selectedAction === "step1" && (
         <CreateAction
           title="Folder"
           icon={<FolderIcon color={Colors.icon} height={24} width={24} />}
-          currentAction={selectedAction}
           onPress={() => {
-            setSelectedAction("folder")
+            createState$.selectedAction.set("folder")
           }}
         />
       )}
-      {!selectedAction && (
+      {selectedAction === "step1" && (
         <CreateAction
           title="Media"
           icon={<ImageIcon color={Colors.icon} height={24} width={24} />}
           className="mt-1"
           style={{ paddingBottom: insets.bottom }}
-          currentAction={selectedAction}
           onPress={async () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
 
@@ -73,10 +53,10 @@ export default function CreateLanding() {
               const response = await requestPermission()
 
               if (response.granted) {
-                setSelectedAction("media")
+                createState$.selectedAction.set("media")
               }
             } else {
-              setSelectedAction("media")
+              createState$.selectedAction.set("media")
             }
           }}
         />
@@ -84,3 +64,5 @@ export default function CreateLanding() {
     </Animated.View>
   )
 }
+
+export default observer(CreateLanding)

@@ -9,15 +9,23 @@ import Animated, {
   FadeIn,
   FadeOut,
   LinearTransition,
+  useAnimatedStyle,
+  withTiming,
 } from "react-native-reanimated"
 
 interface FolderItemProps extends React.ComponentProps<typeof Pressable> {
   title?: string
   image: string
   rowCount?: number
+  isSelected?: boolean
 }
 
 const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
+  const animatedStyle = useAnimatedStyle(() => ({
+    borderWidth: props.isSelected ? withTiming(4) : withTiming(0),
+    padding: props.isSelected ? withTiming(4) : withTiming(0),
+  }))
+
   return (
     <Pressable
       {...props}
@@ -34,9 +42,14 @@ const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
         layout={LinearTransition}
         entering={FadeIn}
         exiting={FadeOut}
-        style={{
-          width: WINDOW_WIDTH / rowCount - PARENT_PADDING - PARENT_PADDING / 2,
-        }}
+        style={[
+          animatedStyle,
+          {
+            width:
+              WINDOW_WIDTH / rowCount - PARENT_PADDING - PARENT_PADDING / 2,
+            borderColor: Colors.redColor,
+          },
+        ]}
       >
         <Image
           source={props.image}

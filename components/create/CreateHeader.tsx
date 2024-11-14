@@ -1,4 +1,6 @@
 import { Colors } from "@/constants/colors"
+import { createState$ } from "@/lib/store/create-store"
+import { observer } from "@legendapp/state/react"
 import { ChevronLeftIcon } from "lucide-react-native"
 import { FC } from "react"
 import { Pressable } from "react-native"
@@ -8,16 +10,14 @@ import Animated, {
   FadeOutLeft,
   LinearTransition,
 } from "react-native-reanimated"
-import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { Text } from "../StyledComponents"
 
-interface CreateHeaderProps {
-  selectedAction: "folder" | "media" | undefined
-  onBack?: () => void
-}
+interface CreateHeaderProps {}
 
-const CreateHeader: FC<CreateHeaderProps> = ({ selectedAction, onBack }) => {
-  const insets = useSafeAreaInsets()
-
+const CreateHeader: FC<CreateHeaderProps> = ({}) => {
+  const selectedAlbum = createState$.selectedAlbum.get()
+  const selectedAction = createState$.selectedAction.get()
+  const totalSelected = createState$.selectedAssets.get().length
   return (
     <Animated.View
       layout={LinearTransition.stiffness(1000).damping(500).mass(3)}
@@ -33,7 +33,15 @@ const CreateHeader: FC<CreateHeaderProps> = ({ selectedAction, onBack }) => {
       ]}
     >
       {selectedAction && (
-        <Pressable onPress={onBack}>
+        <Pressable
+          onPress={() => {
+            if (selectedAlbum) {
+              createState$.selectedAlbum.set(undefined)
+            } else {
+              createState$.setDefault()
+            }
+          }}
+        >
           <Animated.View entering={FadeIn} exiting={FadeOut}>
             <ChevronLeftIcon color={Colors.icon} size={28} strokeWidth={3} />
           </Animated.View>
@@ -58,10 +66,16 @@ const CreateHeader: FC<CreateHeaderProps> = ({ selectedAction, onBack }) => {
           : "Step 1"}
       </Animated.Text>
       <Animated.View>
-        <ChevronLeftIcon color={"transparent"} size={28} strokeWidth={3} />
+        <Text
+          style={{
+            color: selectedAction === "step1" ? "transparent" : Colors.icon,
+          }}
+        >
+          {totalSelected}
+        </Text>
       </Animated.View>
     </Animated.View>
   )
 }
 
-export default CreateHeader
+export default observer(CreateHeader)

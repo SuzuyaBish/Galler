@@ -16,15 +16,9 @@ import Animated, {
 interface CreateActionProps extends React.ComponentProps<typeof Pressable> {
   title: string
   icon: React.ReactNode
-  currentAction: "folder" | "media" | undefined
 }
 
-const CreateAction: FC<CreateActionProps> = ({
-  title,
-  icon,
-  currentAction,
-  ...props
-}) => {
+const CreateAction: FC<CreateActionProps> = ({ title, icon, ...props }) => {
   const animateButton = useAnimatedStyle(() => {
     return {
       backgroundColor: currentAction
