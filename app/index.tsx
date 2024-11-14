@@ -1,4 +1,3 @@
-import Header from "@/components/Header"
 import { ParentView } from "@/components/StyledComponents"
 import ListItem from "@/components/home/ListItem"
 import { PARENT_PADDING, TAB_BAR_HEIGHT } from "@/constants/dimensions"
@@ -7,7 +6,12 @@ import { ScrollView, View } from "react-native"
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
-const folders = [{ id: 0, image: require("../assets/images/img.jpeg") }]
+const folders = [
+  { id: 0, image: require("../assets/images/img.jpeg") },
+  { id: 1, image: require("../assets/images/img.jpeg") },
+  { id: 2, image: require("../assets/images/img.jpeg") },
+  { id: 3, image: require("../assets/images/img.jpeg") },
+]
 
 const images = [
   { id: 0, image: require("../assets/images/img.jpeg") },
@@ -40,16 +44,9 @@ export default function HomeScreen() {
             paddingBottom: insets.bottom + TAB_BAR_HEIGHT,
           }}
         >
-          <Header
-            title={list === folders ? "Folders" : "Images"}
-            hasBackButton={list === images}
-            onBackPress={() => {
-              setList(folders)
-            }}
-          />
           <View
-            className="mt-10 flex flex-row flex-wrap justify-between"
-            style={{ rowGap: PARENT_PADDING }}
+            className="mt-5 flex flex-row flex-wrap justify-between"
+            style={{ rowGap: PARENT_PADDING + 10 }}
           >
             {list.map((image) => {
               return (
@@ -57,7 +54,6 @@ export default function HomeScreen() {
                   key={image.id}
                   title={list === folders ? "Cool" : undefined}
                   image={image.image}
-                  onPress={() => setList(images)}
                 />
               )
             })}

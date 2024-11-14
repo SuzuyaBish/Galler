@@ -1,12 +1,10 @@
 import { Text } from "@/components/StyledComponents"
 import { Colors } from "@/constants/colors"
-import { PARENT_PADDING, WINDOW_WIDTH } from "@/constants/dimensions"
 import * as Haptics from "expo-haptics"
 import { Image } from "expo-image"
 import * as MediaLibrary from "expo-media-library"
-import { SquircleView } from "expo-squircle-view"
 import { FC } from "react"
-import { Pressable, useColorScheme } from "react-native"
+import { Pressable, View } from "react-native"
 import Animated, {
   FadeIn,
   FadeOut,
@@ -16,11 +14,10 @@ import useSWR from "swr"
 
 interface FolderItemProps extends React.ComponentProps<typeof Pressable> {
   album: MediaLibrary.Album
+  rowCount: number
 }
 
-const AlbumItem: FC<FolderItemProps> = ({ album, ...props }) => {
-  const colorscheme = useColorScheme()
-  const colors = Colors[colorscheme ?? "light"]
+const AlbumItem: FC<FolderItemProps> = ({ album, rowCount, ...props }) => {
   const fetcher = async () =>
     await MediaLibrary.getAssetsAsync({ album: album })
   const { data } = useSWR(`assets/${album.id}`, fetcher)
@@ -31,7 +28,8 @@ const AlbumItem: FC<FolderItemProps> = ({ album, ...props }) => {
         {...props}
         className="transition-all duration-200 active:scale-95"
         style={{
-          width: WINDOW_WIDTH / 2 - PARENT_PADDING - PARENT_PADDING / 2,
+          aspectRatio: 1 / 1,
+          width: "48%",
         }}
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
@@ -45,32 +43,39 @@ const AlbumItem: FC<FolderItemProps> = ({ album, ...props }) => {
           layout={LinearTransition}
           entering={FadeIn}
           exiting={FadeOut}
+          style={{
+            width: "100%",
+          }}
         >
-          <SquircleView
-            borderRadius={14}
+          <Image
+            source={data.assets[0].uri}
+            contentFit="cover"
+            transition={500}
             style={{
-              height: WINDOW_WIDTH / 2 - PARENT_PADDING - PARENT_PADDING / 2,
-              width: WINDOW_WIDTH / 2 - PARENT_PADDING - PARENT_PADDING / 2,
-              overflow: "hidden",
-              backgroundColor: colors.lightMutedText,
+              aspectRatio: 1 / 1,
+              width: "100%",
             }}
-          >
-            <Image
-              source={{
-                uri: data.assets[0].uri,
-              }}
-              contentFit="cover"
-              style={{
-                height: WINDOW_WIDTH / 2 - PARENT_PADDING - PARENT_PADDING / 2,
-                width: WINDOW_WIDTH / 2 - PARENT_PADDING - PARENT_PADDING / 2,
-              }}
-            ></Image>
-          </SquircleView>
-          <Animated.View entering={FadeIn} exiting={FadeOut}>
-            <Text color="white" className="text-center" family="SatoshiBlack">
-              {album.title}
-            </Text>
-          </Animated.View>
+          />
+          {album.title && (
+            <View>
+              <Text
+                color={Colors.text}
+                family="SatoshiMedium"
+                numberOfLines={1}
+                className="mt-2"
+              >
+                {album.title}
+              </Text>
+              <Text
+                color={Colors.mutedText}
+                family="SatoshiMedium"
+                numberOfLines={1}
+                className="text-sm"
+              >
+                {album.assetCount} elements
+              </Text>
+            </View>
+          )}
         </Animated.View>
       </Pressable>
     )
