@@ -13,4 +13,5 @@ export const Colors = {
   tabIconSelected: tintColorDark,
   redColor: "#FF4143",
   lightBgMuted: "#101113",
+  gradientBg: ["#050505", "#131313", "#141414"] as [string, string, string],
 }

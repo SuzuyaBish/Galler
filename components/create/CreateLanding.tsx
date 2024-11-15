@@ -1,66 +1,96 @@
 import { Colors } from "@/constants/colors"
-import { createState$ } from "@/lib/store/create-store"
+import { PARENT_PADDING } from "@/constants/dimensions"
+import { state$ } from "@/lib/store/state"
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet"
 import { observer } from "@legendapp/state/react"
-import * as Haptics from "expo-haptics"
-import * as MediaLibrary from "expo-media-library"
-import React from "react"
+import * as ImagePicker from "expo-image-picker"
+import React, { useRef } from "react"
 import Animated, { FadeIn, LinearTransition } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import FolderIcon from "../icons/FolderIcon"
 import ImageIcon from "../icons/ImageIcon"
-import AlbumViewer from "./AlbumViewer"
-import CreateAction from "./CreateAction"
-import CreateHeader from "./CreateHeader"
-import CreateTitle from "./CreateTitle"
+import CreateFolder from "./CreateFolder"
+import CreateOption from "./CreateOption"
 
 function CreateLanding() {
+  const bottomSheetRef = useRef<BottomSheetModal>(null)
   const insets = useSafeAreaInsets()
-  const selectedAction = createState$.selectedAction.get()
 
-  const [permissionResponse, requestPermission] = MediaLibrary.usePermissions()
+  const selectElements = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images", "videos"],
+      allowsMultipleSelection: true,
+    })
 
+    if (!result.canceled) {
+      await state$.createElement(result.assets)
+    }
+  }
   return (
     <Animated.View
       layout={LinearTransition.stiffness(1000).damping(500).mass(3)}
       entering={FadeIn.delay(300)}
-      className="flex-1 gap-y-2"
+      className="flex-1 gap-y-2 rounded-3xl"
+      style={{}}
     >
-      <CreateHeader />
+      <CreateOption
+        icon={<ImageIcon color={Colors.icon} height={18} width={18} />}
+        title="Elements"
+        subtitle="Images or videos"
+        onPress={selectElements}
+      />
+      <CreateOption
+        icon={<FolderIcon color={Colors.icon} height={18} width={18} />}
+        title="Collection"
+        subtitle="Folder for elements"
+        onPress={() => bottomSheetRef.current?.present()}
+      />
 
-      {selectedAction === "media" && <AlbumViewer />}
-
-      <CreateTitle canShow={selectedAction !== "step1"} />
-
-      {selectedAction === "step1" && (
-        <CreateAction
-          title="Folder"
-          icon={<FolderIcon color={Colors.icon} height={24} width={24} />}
-          onPress={() => {
-            createState$.selectedAction.set("folder")
+      <BottomSheetModal
+        ref={bottomSheetRef}
+        enableDynamicSizing
+        handleStyle={{
+          paddingBottom: 0,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: Colors.mutedText,
+        }}
+        animationConfigs={{
+          stiffness: 1000,
+          damping: 500,
+          mass: 3,
+        }}
+        backgroundStyle={{
+          backgroundColor: Colors.mutedBackground,
+          borderRadius: 22,
+        }}
+        backdropComponent={(e) => {
+          return (
+            <BottomSheetBackdrop
+              onPress={() => bottomSheetRef.current?.dismiss()}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+              style={[e.style, { backgroundColor: "rgba(0,0,0,0.6)" }]}
+              animatedIndex={e.animatedIndex}
+              animatedPosition={e.animatedPosition}
+            />
+          )
+        }}
+      >
+        <BottomSheetView
+          className="flex-1"
+          style={{
+            paddingHorizontal: PARENT_PADDING + 5,
+            paddingVertical: PARENT_PADDING,
           }}
-        />
-      )}
-      {selectedAction === "step1" && (
-        <CreateAction
-          title="Media"
-          icon={<ImageIcon color={Colors.icon} height={24} width={24} />}
-          className="mt-1"
-          style={{ paddingBottom: insets.bottom }}
-          onPress={async () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-
-            if (permissionResponse?.status !== "granted") {
-              const response = await requestPermission()
-
-              if (response.granted) {
-                createState$.selectedAction.set("media")
-              }
-            } else {
-              createState$.selectedAction.set("media")
-            }
-          }}
-        />
-      )}
+        >
+          <CreateFolder onBack={() => bottomSheetRef.current?.dismiss()} />
+        </BottomSheetView>
+      </BottomSheetModal>
     </Animated.View>
   )
 }

@@ -2,6 +2,7 @@ import { Colors } from "@/constants/colors"
 import { PARENT_PADDING } from "@/constants/dimensions"
 import { FontType } from "@/lib/types/font-types"
 import { assignFontFamily, cn } from "@/lib/utils"
+import { LinearGradient } from "expo-linear-gradient"
 import { StatusBar } from "expo-status-bar"
 import { FC } from "react"
 import { Text as DefaultText, View as DefaultView } from "react-native"
@@ -25,7 +26,7 @@ interface ParentView extends React.ComponentProps<typeof DefaultView> {
 }
 
 const Text: FC<StyledText> = ({
-  family = "SatoshiMedium",
+  family = "SwitzerRegular",
   color,
   ...props
 }) => {
@@ -48,7 +49,7 @@ const ParentView: FC<ParentView> = ({
   const insets = useSafeAreaInsets()
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style={"light"} />
       <DefaultView
         {...props}
         className={cn(
@@ -61,7 +62,6 @@ const ParentView: FC<ParentView> = ({
         )}
         style={[
           props.style,
-          { backgroundColor: Colors.background },
           hasInsets && { paddingTop: insets.top + (extraInsets ? 30 : 0) },
           padding?.left && { paddingLeft: PARENT_PADDING },
           padding?.right && { paddingRight: PARENT_PADDING },
@@ -69,6 +69,19 @@ const ParentView: FC<ParentView> = ({
           padding?.bottom && { paddingBottom: insets.bottom + 30 },
         ]}
       >
+        <LinearGradient
+          colors={Colors.gradientBg}
+          locations={[0, 0.5, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          }}
+        />
         {children}
       </DefaultView>
     </>

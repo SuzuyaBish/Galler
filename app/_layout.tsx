@@ -15,11 +15,12 @@ SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const [loaded] = useFonts({
-    SatoshiLight: require("../assets/fonts/Satoshi/Satoshi-Light.otf"),
-    SatoshiRegular: require("../assets/fonts/Satoshi/Satoshi-Regular.otf"),
-    SatoshiMedium: require("../assets/fonts/Satoshi/Satoshi-Medium.otf"),
-    SatoshiBold: require("../assets/fonts/Satoshi/Satoshi-Bold.otf"),
-    SatoshiBlack: require("../assets/fonts/Satoshi/Satoshi-Black.otf"),
+    SwitzerLight: require("../assets/fonts/Switzer/Switzer-Light.otf"),
+    SwitzerRegular: require("../assets/fonts/Switzer/Switzer-Regular.otf"),
+    SwitzerMedium: require("../assets/fonts/Switzer/Switzer-Medium.otf"),
+    SwitzerBold: require("../assets/fonts/Switzer/Switzer-Bold.otf"),
+    SwitzerBlack: require("../assets/fonts/Switzer/Switzer-Black.otf"),
+    Gambarino: require("../assets/fonts/Gambarino/Gambarino-Regular.otf"),
   })
 
   useEffect(() => {

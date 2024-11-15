@@ -1,9 +1,14 @@
 import { Colors } from "@/constants/colors"
 import { PARENT_PADDING, TAB_BAR_HEIGHT } from "@/constants/dimensions"
-import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet"
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet"
+import { BlurView } from "expo-blur"
 import * as Haptics from "expo-haptics"
 import React, { useRef } from "react"
-import { Pressable, View } from "react-native"
+import { Pressable } from "react-native"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import CreateLanding from "./create/CreateLanding"
 import AddIcon from "./icons/PlusIcon"
@@ -14,16 +19,21 @@ export default function BottomActions() {
   const insets = useSafeAreaInsets()
   const bottomSheetRef = useRef<BottomSheetModal>(null)
   return (
-    <View
+    <BlurView
+      tint="dark"
+      experimentalBlurMethod="dimezisBlurView"
       style={{
-        left: PARENT_PADDING,
-        right: PARENT_PADDING,
+        left: 0,
+        right: 0,
         paddingBottom: insets.bottom,
         height: TAB_BAR_HEIGHT,
       }}
       className="absolute bottom-0 flex flex-row items-center justify-between pt-4"
     >
-      <Pressable className="rounded-full px-2 py-3">
+      <Pressable
+        className="rounded-full px-2 py-3"
+        style={{ marginLeft: PARENT_PADDING }}
+      >
         <SearchIcon color={Colors.icon} />
       </Pressable>
       <Pressable
@@ -36,36 +46,60 @@ export default function BottomActions() {
           backgroundColor: Colors.mutedBackground,
         }}
       >
-        <AddIcon color={Colors.icon} />
+        <AddIcon color="white" />
       </Pressable>
-      <Pressable className="rounded-full px-2 py-3">
+      <Pressable
+        className="rounded-full px-2 py-3"
+        style={{ marginRight: PARENT_PADDING }}
+      >
         <SettingsIcon color={Colors.icon} />
       </Pressable>
       <BottomSheetModal
         ref={bottomSheetRef}
-        snapPoints={["90%"]}
-        enableDynamicSizing={false}
-        handleComponent={null}
+        enableDynamicSizing
+        handleStyle={{
+          paddingBottom: 0,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: Colors.mutedText,
+        }}
+        detached
+        bottomInset={insets.bottom}
+        style={{
+          marginHorizontal: PARENT_PADDING * 2,
+        }}
         animationConfigs={{
           stiffness: 1000,
           damping: 500,
           mass: 3,
-          // @ts-ignore
-          duration: 300,
         }}
         backgroundStyle={{
           backgroundColor: Colors.mutedBackground,
+          borderRadius: 22,
+        }}
+        backdropComponent={(e) => {
+          return (
+            <BottomSheetBackdrop
+              onPress={() => bottomSheetRef.current?.dismiss()}
+              appearsOnIndex={0}
+              disappearsOnIndex={-1}
+              style={[e.style, { backgroundColor: "rgba(0,0,0,0.6)" }]}
+              animatedIndex={e.animatedIndex}
+              animatedPosition={e.animatedPosition}
+            />
+          )
         }}
       >
         <BottomSheetView
           className="flex-1"
           style={{
-            paddingHorizontal: PARENT_PADDING,
+            paddingHorizontal: PARENT_PADDING + 5,
+            paddingVertical: PARENT_PADDING,
           }}
         >
           <CreateLanding />
         </BottomSheetView>
       </BottomSheetModal>
-    </View>
+    </BlurView>
   )
 }

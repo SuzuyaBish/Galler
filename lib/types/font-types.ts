@@ -1,7 +1,7 @@
 export type FontType =
-  | "SatoshiLight"
-  | "SatoshiRegular"
-  | "SatoshiMedium"
-  | "SatoshiBold"
-  | "SatoshiBlack"
-  | undefined
+  | "SwitzerLight"
+  | "SwitzerRegular"
+  | "SwitzerMedium"
+  | "SwitzerBold"
+  | "SwitzerBlack"
+  | "Gambarino"

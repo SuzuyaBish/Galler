@@ -1,6 +1,5 @@
 import { Text } from "@/components/StyledComponents"
 import { Colors } from "@/constants/colors"
-import { PARENT_PADDING, WINDOW_WIDTH } from "@/constants/dimensions"
 import * as Haptics from "expo-haptics"
 import { Image } from "expo-image"
 import { FC } from "react"
@@ -18,6 +17,7 @@ interface FolderItemProps extends React.ComponentProps<typeof Pressable> {
   image: string
   rowCount?: number
   isSelected?: boolean
+  subtitle?: string
 }
 
 const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
@@ -45,25 +45,31 @@ const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
         style={[
           animatedStyle,
           {
-            width:
-              WINDOW_WIDTH / rowCount - PARENT_PADDING - PARENT_PADDING / 2,
+            width: "100%",
             borderColor: Colors.redColor,
           },
         ]}
       >
-        <Image
-          source={props.image}
-          contentFit="cover"
-          transition={500}
+        <View
+          className="overflow-hidden rounded-xl"
           style={{
-            aspectRatio: 1 / 1,
+            backgroundColor: Colors.mutedBackground,
           }}
-        />
+        >
+          <Image
+            source={props.image}
+            contentFit="cover"
+            transition={500}
+            style={{
+              aspectRatio: 1 / 1,
+            }}
+          />
+        </View>
         {props.title && (
           <View>
             <Text
               color={Colors.text}
-              family="SatoshiMedium"
+              family="SwitzerMedium"
               numberOfLines={1}
               className="mt-2"
             >
@@ -71,10 +77,10 @@ const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
             </Text>
             <Text
               color={Colors.mutedText}
-              family="SatoshiMedium"
+              family="SwitzerMedium"
               numberOfLines={1}
             >
-              133 elements
+              {props.subtitle}
             </Text>
           </View>
         )}
