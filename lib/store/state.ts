@@ -2,7 +2,7 @@ import { observable } from "@legendapp/state"
 import { observablePersistAsyncStorage } from "@legendapp/state/persist-plugins/async-storage"
 import { configureSynced, syncObservable } from "@legendapp/state/sync"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { Directory, File, Paths } from "expo-file-system/next"
+import * as FileSystem from "expo-file-system"
 import { ImagePickerAsset } from "expo-image-picker"
 import uuid from "react-native-uuid"
 import { Element, Folder } from "../types/state-types"
@@ -22,17 +22,20 @@ export const state$ = observable({
   folders: [] as Folder[],
   createElement: async (elements: ImagePickerAsset[]) => {
     try {
-      const newDirectory = new Directory(Paths.document, "store")
-      if (!newDirectory.exists) newDirectory.create()
+      const directory = `${FileSystem.documentDirectory}store`
+      await FileSystem.makeDirectoryAsync(directory, { intermediates: true })
 
       for (const element of elements) {
-        const file = new File(element.uri)
-        await file.move(newDirectory)
+        const newUri = `${directory}/${generateId()}-${element.fileName}`
+        await FileSystem.copyAsync({
+          from: element.uri,
+          to: newUri,
+        })
 
         state$.elements.push({
           ...element,
           id: generateId(),
-          uri: file.uri,
+          uri: newUri,
           folderId: "",
         })
       }

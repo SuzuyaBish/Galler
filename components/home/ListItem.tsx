@@ -18,7 +18,10 @@ interface FolderItemProps extends React.ComponentProps<typeof Pressable> {
   rowCount?: number
   isSelected?: boolean
   subtitle?: string
+  transitionTag?: string
 }
+
+const AnimatedImage = Animated.createAnimatedComponent(Image)
 
 const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
   const animatedStyle = useAnimatedStyle(() => ({
@@ -50,21 +53,16 @@ const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
           },
         ]}
       >
-        <View
-          className="overflow-hidden rounded-xl"
+        <AnimatedImage
+          source={props.image}
+          contentFit="cover"
+          transition={500}
+          sharedTransitionTag={props.transitionTag}
           style={{
-            backgroundColor: Colors.mutedBackground,
+            aspectRatio: 1 / 1,
+            borderRadius: 10,
           }}
-        >
-          <Image
-            source={props.image}
-            contentFit="cover"
-            transition={500}
-            style={{
-              aspectRatio: 1 / 1,
-            }}
-          />
-        </View>
+        />
         {props.title && (
           <View>
             <Text

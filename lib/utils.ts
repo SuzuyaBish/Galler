@@ -1,5 +1,6 @@
 import clsx, { ClassValue } from "clsx"
 import { Directory } from "expo-file-system/next"
+import * as Sharing from "expo-sharing"
 import { twMerge } from "tailwind-merge"
 import { FontType } from "./types/font-types"
 
@@ -45,5 +46,14 @@ export function printDirectory(directory: Directory, indent: number = 0) {
         `${" ".repeat(indent + 2)} - ${item.name} (${item.size} bytes)`
       )
     }
+  }
+}
+
+export const share = async (uri: string) => {
+  const isAvailable = await Sharing.isAvailableAsync()
+  if (isAvailable) {
+    await Sharing.shareAsync(uri, {
+      dialogTitle: "Share image",
+    })
   }
 }
