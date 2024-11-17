@@ -16,7 +16,7 @@ import ImageIcon from "../icons/ImageIcon"
 import CreateFolder from "./CreateFolder"
 import CreateOption from "./CreateOption"
 
-function CreateLanding() {
+function CreateLanding({ onDone }: { onDone: () => void }) {
   const bottomSheetRef = useRef<BottomSheetModal>(null)
   const insets = useSafeAreaInsets()
 
@@ -27,7 +27,9 @@ function CreateLanding() {
     })
 
     if (!result.canceled) {
-      await state$.createElement(result.assets)
+      await state$.createElement(result.assets).then(() => {
+        onDone()
+      })
     }
   }
   return (
@@ -88,7 +90,14 @@ function CreateLanding() {
             paddingVertical: PARENT_PADDING,
           }}
         >
-          <CreateFolder onBack={() => bottomSheetRef.current?.dismiss()} />
+          <CreateFolder
+            onBack={(isDone) => {
+              if (isDone) {
+                onDone()
+                bottomSheetRef.current?.dismiss()
+              }
+            }}
+          />
         </BottomSheetView>
       </BottomSheetModal>
     </Animated.View>

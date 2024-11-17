@@ -9,3 +9,9 @@ export type Folder = {
   id: string
   name: string
 }
+
+export type Collection = {
+  id: string
+  name: string
+  elements: Element[]
+}

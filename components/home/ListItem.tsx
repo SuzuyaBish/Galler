@@ -1,9 +1,8 @@
-import { Text } from "@/components/StyledComponents"
 import { Colors } from "@/constants/colors"
 import * as Haptics from "expo-haptics"
 import { Image } from "expo-image"
 import { FC } from "react"
-import { Pressable, View } from "react-native"
+import { Pressable } from "react-native"
 import Animated, {
   FadeIn,
   FadeOut,
@@ -13,11 +12,9 @@ import Animated, {
 } from "react-native-reanimated"
 
 interface FolderItemProps extends React.ComponentProps<typeof Pressable> {
-  title?: string
   image: string
   rowCount?: number
   isSelected?: boolean
-  subtitle?: string
   transitionTag?: string
 }
 
@@ -63,25 +60,6 @@ const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
             borderRadius: 10,
           }}
         />
-        {props.title && (
-          <View>
-            <Text
-              color={Colors.text}
-              family="SwitzerMedium"
-              numberOfLines={1}
-              className="mt-2"
-            >
-              {props.title}
-            </Text>
-            <Text
-              color={Colors.mutedText}
-              family="SwitzerMedium"
-              numberOfLines={1}
-            >
-              {props.subtitle}
-            </Text>
-          </View>
-        )}
       </Animated.View>
     </Pressable>
   )

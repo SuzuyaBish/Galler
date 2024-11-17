@@ -1,3 +1,4 @@
+import CollectionItem from "@/components/home/CollectionItem"
 import ListItem from "@/components/home/ListItem"
 import { ParentView, Text } from "@/components/StyledComponents"
 import { Colors } from "@/constants/colors"
@@ -5,6 +6,7 @@ import { PARENT_PADDING, WINDOW_WIDTH } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
 import { share } from "@/lib/utils"
 import { observer } from "@legendapp/state/react"
+import * as Haptics from "expo-haptics"
 import { useRouter } from "expo-router"
 import { ChevronRightIcon } from "lucide-react-native"
 import { Pressable, ScrollView, View } from "react-native"
@@ -63,17 +65,16 @@ function HomeScreen() {
                     image={item.uri}
                     transitionTag={`element-${item.id}`}
                     onPress={async () => await share(item.uri)}
-                    onLongPress={() =>
+                    onLongPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
                       router.push({
                         pathname: "/random",
                         params: {
-                          uri: item.uri,
                           transitionTag: `element-${item.id}`,
-                          width: item.width.toString(),
-                          height: item.height.toString(),
+                          id: item.id,
                         },
                       })
-                    }
+                    }}
                   />
                 )}
               />
@@ -90,14 +91,7 @@ function HomeScreen() {
                 itemDimension={WINDOW_WIDTH / 2 - PARENT_PADDING * 2 - 20}
                 data={folders}
                 spacing={20}
-                renderItem={({ item }) => (
-                  <ListItem
-                    key={item.id}
-                    image={item.elements.length > 0 ? item.elements[0].uri : ""}
-                    title={item.name}
-                    subtitle={`${item.elements.length} elements`}
-                  />
-                )}
+                renderItem={({ item }) => <CollectionItem collection={item} />}
               />
             </View>
           )}

@@ -5,7 +5,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import * as FileSystem from "expo-file-system"
 import { ImagePickerAsset } from "expo-image-picker"
 import uuid from "react-native-uuid"
-import { Element, Folder } from "../types/state-types"
+import { Collection, Element, Folder } from "../types/state-types"
 
 export const generateId = () => uuid.v4() as string
 
@@ -43,7 +43,19 @@ export const state$ = observable({
       console.log(error)
     }
   },
-  getFoldersWithElements: () => {
+  getElementById: (id: string) => {
+    return state$.elements.find((element) => element.id.peek() === id)
+  },
+  updateElement: (id: string, updates: Partial<Element>) => {
+    const element = state$.elements.find((element) => element.id.peek() === id)
+    if (element) {
+      element.set({
+        ...element.get(),
+        ...updates,
+      })
+    }
+  },
+  getFoldersWithElements: (): Collection[] => {
     return state$.folders.get().map((folder) => {
       return {
         ...folder,

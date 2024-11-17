@@ -6,7 +6,11 @@ import { ChevronLeftIcon, PlusIcon } from "lucide-react-native"
 import React, { useState } from "react"
 import { Pressable, View } from "react-native"
 
-export default function CreateFolder({ onBack }: { onBack: () => void }) {
+export default function CreateFolder({
+  onBack,
+}: {
+  onBack: (isDone: boolean) => void
+}) {
   const [name, setName] = useState("")
   return (
     <View>
@@ -15,7 +19,7 @@ export default function CreateFolder({ onBack }: { onBack: () => void }) {
         style={{ borderColor: Colors.lightMutedBackground }}
       >
         <Pressable
-          onPress={onBack}
+          onPress={() => onBack(false)}
           className="rounded-full p-3"
           style={{ backgroundColor: Colors.lightMutedBackground }}
         >
@@ -29,7 +33,7 @@ export default function CreateFolder({ onBack }: { onBack: () => void }) {
           onPress={() => {
             if (name.length > 0) {
               state$.createFolder(name)
-              onBack()
+              onBack(true)
             }
           }}
           style={{

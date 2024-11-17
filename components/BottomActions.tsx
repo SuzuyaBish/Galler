@@ -97,7 +97,7 @@ export default function BottomActions() {
             paddingVertical: PARENT_PADDING,
           }}
         >
-          <CreateLanding />
+          <CreateLanding onDone={() => bottomSheetRef.current?.dismiss()} />
         </BottomSheetView>
       </BottomSheetModal>
     </BlurView>
