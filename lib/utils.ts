@@ -1,4 +1,5 @@
 import clsx, { ClassValue } from "clsx"
+import * as FileSystem from "expo-file-system"
 import { Directory } from "expo-file-system/next"
 import * as Sharing from "expo-sharing"
 import { twMerge } from "tailwind-merge"
@@ -56,4 +57,8 @@ export const share = async (uri: string) => {
       dialogTitle: "Share image",
     })
   }
+}
+
+export const deleteElementFromFileSystem = async (uri: string) => {
+  await FileSystem.deleteAsync(uri)
 }

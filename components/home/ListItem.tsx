@@ -5,7 +5,6 @@ import { FC } from "react"
 import { Pressable } from "react-native"
 import Animated, {
   FadeIn,
-  FadeOut,
   LinearTransition,
   useAnimatedStyle,
   withTiming,
@@ -41,7 +40,6 @@ const ListItem: FC<FolderItemProps> = ({ rowCount = 2, ...props }) => {
       <Animated.View
         layout={LinearTransition}
         entering={FadeIn}
-        exiting={FadeOut}
         style={[
           animatedStyle,
           {

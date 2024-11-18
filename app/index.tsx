@@ -14,6 +14,8 @@ import Animated, { FadeIn, FadeOut } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { SimpleGrid } from "react-native-super-grid"
 
+const AnimatedGrid = Animated.createAnimatedComponent(SimpleGrid)
+
 function HomeScreen() {
   const insets = useSafeAreaInsets()
   const elements = state$.elements.get()

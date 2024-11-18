@@ -2,12 +2,13 @@ import { Text } from "@/components/StyledComponents"
 import { Colors } from "@/constants/colors"
 import { PARENT_PADDING } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
-import { share } from "@/lib/utils"
+import { deleteElementFromFileSystem, share } from "@/lib/utils"
 import { observer } from "@legendapp/state/react"
 import { BlurView } from "expo-blur"
 import { Image } from "expo-image"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import {
+  BoxSelectIcon,
   CheckIcon,
   ChevronLeftIcon,
   FolderOpenIcon,
@@ -42,6 +43,7 @@ function RandomScreen() {
   const router = useRouter()
 
   const [movingFolder, setMovingFolder] = useState<boolean>(false)
+  const [isDeleting, setIsDeleting] = useState<boolean>(false)
 
   return (
     <Pressable className="flex-1" onPress={() => router.back()}>
@@ -59,9 +61,9 @@ function RandomScreen() {
             sharedTransitionTag={transitionTag}
             source={element?.uri}
             style={{
-              maxHeight: 400,
+              maxHeight: 350,
               width: "100%",
-              aspectRatio: element!.width / element!.height,
+              aspectRatio: (element?.width ?? 1) / (element?.height ?? 1),
               borderRadius: 20,
             }}
           />
@@ -73,7 +75,42 @@ function RandomScreen() {
           }}
           className="mt-20 grow gap-y-4"
         >
-          {!movingFolder && (
+          {!movingFolder && !isDeleting && (
+            <Animated.View
+              layout={LinearTransition}
+              entering={FadeIn}
+              exiting={FadeOut}
+            >
+              <Pressable className="flex-row items-center gap-x-7 py-5">
+                <BoxSelectIcon color={Colors.icon} />
+                <Text color={Colors.icon} className="text-xl">
+                  Select
+                </Text>
+              </Pressable>
+            </Animated.View>
+          )}
+          {!isDeleting && (
+            <Animated.View
+              layout={LinearTransition}
+              entering={FadeIn}
+              exiting={FadeOut}
+            >
+              <Pressable
+                onPress={() => setMovingFolder(!movingFolder)}
+                className="flex-row items-center gap-x-7 py-5"
+              >
+                {movingFolder ? (
+                  <ChevronLeftIcon color={Colors.icon} />
+                ) : (
+                  <FolderOpenIcon color={Colors.icon} />
+                )}
+                <Text color={Colors.icon} className="text-xl">
+                  Move
+                </Text>
+              </Pressable>
+            </Animated.View>
+          )}
+          {!movingFolder && !isDeleting && (
             <Animated.View
               layout={LinearTransition}
               entering={FadeIn}
@@ -90,32 +127,18 @@ function RandomScreen() {
               </Pressable>
             </Animated.View>
           )}
-          <Animated.View
-            layout={LinearTransition}
-            entering={FadeIn}
-            exiting={FadeOut}
-          >
-            <Pressable
-              onPress={() => setMovingFolder(!movingFolder)}
-              className="flex-row items-center gap-x-7 py-5"
-            >
-              {movingFolder ? (
-                <ChevronLeftIcon color={Colors.icon} />
-              ) : (
-                <FolderOpenIcon color={Colors.icon} />
-              )}
-              <Text color={Colors.icon} className="text-xl">
-                Move to folder
-              </Text>
-            </Pressable>
-          </Animated.View>
-          {!movingFolder && (
+          {!movingFolder && !isDeleting && (
             <Animated.View
               layout={LinearTransition}
               entering={FadeIn}
               exiting={FadeOut}
             >
-              <Pressable className="flex-row items-center gap-x-7 py-5">
+              <Pressable
+                className="flex-row items-center gap-x-7 py-5"
+                onPress={async () => {
+                  setIsDeleting(!isDeleting)
+                }}
+              >
                 <Trash2Icon color={Colors.redColor} />
                 <Text color={Colors.redColor} className="text-xl">
                   Delete
@@ -123,7 +146,47 @@ function RandomScreen() {
               </Pressable>
             </Animated.View>
           )}
-          {movingFolder && (
+          {isDeleting && (
+            <Animated.View
+              layout={LinearTransition}
+              entering={FadeIn}
+              exiting={FadeOut}
+              className="flex-1 grow"
+            >
+              <Text className="text-center">
+                Are you sure you want to delete
+              </Text>
+              <Text className="text-center">this element?</Text>
+              <View className="flex-1 items-center justify-center">
+                <View className="flex flex-row items-center justify-center gap-x-5">
+                  <Pressable
+                    className="px-10 py-5"
+                    onPress={() => setIsDeleting(false)}
+                  >
+                    <Text className="text-xl" color={Colors.icon}>
+                      Cancel
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    className="px-10 py-5"
+                    onPress={async () => {
+                      await deleteElementFromFileSystem(element!.uri).then(
+                        () => {
+                          elementState?.delete()
+                          router.back()
+                        }
+                      )
+                    }}
+                  >
+                    <Text className="text-xl" color={Colors.redColor}>
+                      Delete
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </Animated.View>
+          )}
+          {movingFolder && !isDeleting && (
             <View className="flex-1 grow">
               <ScrollView showsVerticalScrollIndicator={false}>
                 {folders.map((folder) => {

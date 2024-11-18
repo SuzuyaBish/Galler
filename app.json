@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "gal",
-    "slug": "gal",
+    "name": "Nest",
+    "slug": "nest",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": false,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.wixisgreasy.gal"
+      "bundleIdentifier": "com.wixisgreasy.nest"
     },
     "android": {
       "adaptiveIcon": {
