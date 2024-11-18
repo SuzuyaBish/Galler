@@ -27,13 +27,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 type Params = {
   transitionTag: string
   id: string
+  fromHome: string
 }
 
 const AnimatedExpoImage = Animated.createAnimatedComponent(Image)
 const AnimatedBlurView = Animated.createAnimatedComponent(BlurView)
 
 function RandomScreen() {
-  const { transitionTag, id } = useLocalSearchParams() as Params
+  const { transitionTag, id, fromHome } = useLocalSearchParams() as Params
 
   const folders = state$.getFoldersWithElements()
   const elementState = state$.getElementById(id)
@@ -75,7 +76,7 @@ function RandomScreen() {
           }}
           className="mt-20 grow gap-y-4"
         >
-          {!movingFolder && !isDeleting && (
+          {!movingFolder && !isDeleting && fromHome !== "true" && (
             <Animated.View
               layout={LinearTransition}
               entering={FadeIn}

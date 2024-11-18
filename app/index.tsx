@@ -74,6 +74,7 @@ function HomeScreen() {
                         params: {
                           transitionTag: `element-${item.id}`,
                           id: item.id,
+                          fromHome: "true",
                         },
                       })
                     }}
