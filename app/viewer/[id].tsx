@@ -1,5 +1,6 @@
 import { ParentView } from "@/components/StyledComponents"
 import MasonryElementList from "@/components/viewer/MasonryElementList"
+import GestureScrollView from "@/components/viewer/GestureScrollView"
 import { PARENT_PADDING } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet"
@@ -14,6 +15,7 @@ import Animated, {
   useAnimatedProps,
   useAnimatedScrollHandler,
   useSharedValue,
+  useAnimatedStyle,
 } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -29,62 +31,69 @@ function Viewer() {
   const insets = useSafeAreaInsets()
   const { transitionTag, id } = useLocalSearchParams() as Params
   const elements = state$.elements.get()
+  const pagerRef = React.useRef<PagerView>(null)
 
   const offset = useSharedValue(0)
-  const scrollHandler = useAnimatedScrollHandler((event) => {
-    offset.value = event.contentOffset.y
-  })
+  const pagerHeight = WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom
+  const [currentPage, setCurrentPage] = React.useState(
+    elements?.findIndex((element) => element.id === id) ?? 0
+  )
 
-  const offsetAnimation = useAnimatedProps(() => {
-    return {
-      opacity: 1 - Math.min(1, offset.value / 300),
-      transform: [{ translateY: -Math.min(30, offset.value / 10) }],
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      'worklet';
+      offset.value = event.contentOffset.y
     }
   })
 
-  const offsetAnimationFaster = useAnimatedProps(() => {
-    return {
-      opacity: 1 - Math.min(1, offset.value / 100),
+  const handleHorizontalGesture = React.useCallback((direction: "left" | "right") => {
+    if (direction === "left" && currentPage < (elements?.length ?? 0) - 1) {
+      pagerRef.current?.setPage(currentPage + 1)
+    } else if (direction === "right" && currentPage > 0) {
+      pagerRef.current?.setPage(currentPage - 1)
     }
-  })
+  }, [currentPage, elements?.length])
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: 1 - Math.min(1, offset.value / 300),
+    transform: [{ translateY: -Math.min(30, offset.value / 10) }],
+  }))
+
+  const buttonStyle = useAnimatedStyle(() => ({
+    opacity: 1 - Math.min(1, offset.value / 100),
+  }))
 
   if (elements) {
     return (
       <ParentView hasInsets={false} extraInsets={false} className="relative">
         <View className="absolute left-0 right-0" style={{ top: insets.top }}>
           <Button title="Back" onPress={() => router.back()} />
-          {/* <Text>
-            {(WINDOW_HEIGHT -
-              (WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom)) /
-              2}
-          </Text> */}
         </View>
         <Animated.View
           className="flex-1 items-center justify-center"
-          style={offsetAnimation}
+          style={animatedStyle}
         >
           <PagerView
+            ref={pagerRef}
             style={{
               flex: 1,
               height: "100%",
               width: "100%",
-              maxHeight: WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom,
+              maxHeight: pagerHeight,
             }}
             initialPage={elements.findIndex((element) => element.id === id)}
+            onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
           >
             {elements.map((element) => {
               return (
                 <AnimatedImage
                   key={element.id}
                   contentFit="contain"
-                  style={[
-                    {
-                      width: "100%",
-                      height: "auto",
-                      aspectRatio:
-                        (element?.width ?? 1) / (element?.height ?? 1),
-                    },
-                  ]}
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    aspectRatio: (element?.width ?? 1) / (element?.height ?? 1),
+                  }}
                   sharedTransitionTag={transitionTag}
                   source={element.uri}
                 />
@@ -95,7 +104,7 @@ function Viewer() {
         <Animated.View
           className="absolute left-0 right-0 flex flex-row items-center justify-center gap-x-3"
           style={[
-            offsetAnimationFaster,
+            buttonStyle,
             {
               bottom: insets.bottom + 30,
               paddingHorizontal: PARENT_PADDING,
@@ -106,7 +115,7 @@ function Viewer() {
             <Share2Icon />
           </Pressable>
         </Animated.View>
-        <Animated.ScrollView
+        <GestureScrollView
           onScroll={scrollHandler}
           showsVerticalScrollIndicator={false}
           className="absolute bottom-0 left-0 right-0 top-0 flex-1"
@@ -116,9 +125,11 @@ function Viewer() {
           style={{
             paddingTop: WINDOW_HEIGHT - insets.bottom,
           }}
+          onHorizontalGesture={handleHorizontalGesture}
+          pagerEnabled={offset.value <= 0}
         >
           <MasonryElementList elements={elements} scrollEnabled={false} />
-        </Animated.ScrollView>
+        </GestureScrollView>
       </ParentView>
     )
   }
