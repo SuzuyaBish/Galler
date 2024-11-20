@@ -8,9 +8,13 @@ import { Image } from "expo-image"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Share2Icon } from "lucide-react-native"
 import React from "react"
-import { Button, Pressable, ScrollView, View } from "react-native"
+import { Button, Pressable, View } from "react-native"
 import PagerView from "react-native-pager-view"
-import Animated from "react-native-reanimated"
+import Animated, {
+  useAnimatedProps,
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
 type Params = {
@@ -26,13 +30,39 @@ function Viewer() {
   const { transitionTag, id } = useLocalSearchParams() as Params
   const elements = state$.elements.get()
 
+  const offset = useSharedValue(0)
+  const scrollHandler = useAnimatedScrollHandler((event) => {
+    offset.value = event.contentOffset.y
+  })
+
+  const offsetAnimation = useAnimatedProps(() => {
+    return {
+      opacity: 1 - Math.min(1, offset.value / 300),
+      transform: [{ translateY: -Math.min(30, offset.value / 10) }],
+    }
+  })
+
+  const offsetAnimationFaster = useAnimatedProps(() => {
+    return {
+      opacity: 1 - Math.min(1, offset.value / 100),
+    }
+  })
+
   if (elements) {
     return (
       <ParentView hasInsets={false} extraInsets={false} className="relative">
         <View className="absolute left-0 right-0" style={{ top: insets.top }}>
           <Button title="Back" onPress={() => router.back()} />
+          {/* <Text>
+            {(WINDOW_HEIGHT -
+              (WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom)) /
+              2}
+          </Text> */}
         </View>
-        <View className="flex-1 items-center justify-center">
+        <Animated.View
+          className="flex-1 items-center justify-center"
+          style={offsetAnimation}
+        >
           <PagerView
             style={{
               flex: 1,
@@ -61,19 +91,23 @@ function Viewer() {
               )
             })}
           </PagerView>
-        </View>
-        <View
+        </Animated.View>
+        <Animated.View
           className="absolute left-0 right-0 flex flex-row items-center justify-center gap-x-3"
-          style={{
-            bottom: insets.bottom + 30,
-            paddingHorizontal: PARENT_PADDING,
-          }}
+          style={[
+            offsetAnimationFaster,
+            {
+              bottom: insets.bottom + 30,
+              paddingHorizontal: PARENT_PADDING,
+            },
+          ]}
         >
           <Pressable>
             <Share2Icon />
           </Pressable>
-        </View>
-        <ScrollView
+        </Animated.View>
+        <Animated.ScrollView
+          onScroll={scrollHandler}
           showsVerticalScrollIndicator={false}
           className="absolute bottom-0 left-0 right-0 top-0 flex-1"
           contentContainerStyle={{
@@ -84,7 +118,7 @@ function Viewer() {
           }}
         >
           <MasonryElementList elements={elements} scrollEnabled={false} />
-        </ScrollView>
+        </Animated.ScrollView>
       </ParentView>
     )
   }
