@@ -4,7 +4,6 @@ import { ParentView, Text } from "@/components/StyledComponents"
 import { Colors } from "@/constants/colors"
 import { PARENT_PADDING, WINDOW_WIDTH } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
-import { share } from "@/lib/utils"
 import { observer } from "@legendapp/state/react"
 import * as Haptics from "expo-haptics"
 import { useRouter } from "expo-router"
@@ -66,11 +65,20 @@ function HomeScreen() {
                     key={item.id}
                     image={item.uri}
                     transitionTag={`element-${item.id}`}
-                    onPress={async () => await share(item.uri)}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/viewer/[id]",
+                        params: {
+                          transitionTag: `element-${item.id}`,
+                          id: item.id,
+                          fromHome: "true",
+                        },
+                      })
+                    }
                     onLongPress={() => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
                       router.push({
-                        pathname: "/random",
+                        pathname: "/actions",
                         params: {
                           transitionTag: `element-${item.id}`,
                           id: item.id,

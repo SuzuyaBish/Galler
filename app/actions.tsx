@@ -2,6 +2,7 @@ import { Text } from "@/components/StyledComponents"
 import { Colors } from "@/constants/colors"
 import { PARENT_PADDING } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
+import { Element } from "@/lib/types/state-types"
 import { deleteElementFromFileSystem, share } from "@/lib/utils"
 import { observer } from "@legendapp/state/react"
 import { BlurView } from "expo-blur"
@@ -15,7 +16,7 @@ import {
   ShareIcon,
   Trash2Icon,
 } from "lucide-react-native"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Pressable, ScrollView, View } from "react-native"
 import Animated, {
   FadeIn,
@@ -37,14 +38,20 @@ function RandomScreen() {
   const { transitionTag, id, fromHome } = useLocalSearchParams() as Params
 
   const folders = state$.getFoldersWithElements()
-  const elementState = state$.getElementById(id)
-  const element = elementState?.get()
+  const elements = state$.elements.get()
 
   const insets = useSafeAreaInsets()
   const router = useRouter()
 
   const [movingFolder, setMovingFolder] = useState<boolean>(false)
   const [isDeleting, setIsDeleting] = useState<boolean>(false)
+  const [element, setElement] = useState<Element | undefined>()
+
+  useEffect(() => {
+    if (elements) {
+      setElement(elements.find((element) => element.id === id))
+    }
+  }, [elements])
 
   return (
     <Pressable className="flex-1" onPress={() => router.back()}>
@@ -173,7 +180,12 @@ function RandomScreen() {
                     onPress={async () => {
                       await deleteElementFromFileSystem(element!.uri).then(
                         () => {
-                          elementState?.delete()
+                          const foundElement = state$.elements.find(
+                            (e) => e.id.peek() === id
+                          )
+                          if (foundElement) {
+                            foundElement.delete()
+                          }
                           router.back()
                         }
                       )
@@ -203,13 +215,16 @@ function RandomScreen() {
                         onPress={() => {
                           const elementInFolder =
                             element?.folderId === folder.id
-                          if (elementInFolder) {
-                            elementState?.set({
-                              ...element,
+                          const foundElement = state$.elements.find(
+                            (e) => e.id.peek() === id
+                          )
+                          if (elementInFolder && foundElement) {
+                            foundElement.set({
+                              ...element!,
                               folderId: "",
                             })
                           } else {
-                            elementState?.set({
+                            foundElement?.set({
                               ...element!,
                               folderId: folder.id,
                             })

@@ -11,7 +11,17 @@ import "react-native-gesture-handler"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import "react-native-reanimated"
 
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from "react-native-reanimated"
+
 SplashScreen.preventAutoHideAsync()
+
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false,
+})
 
 export default function RootLayout() {
   const [loaded] = useFonts({
@@ -40,7 +50,15 @@ export default function RootLayout() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
           <Stack.Screen
-            name="random"
+            name="actions"
+            options={{
+              headerShown: false,
+              presentation: "transparentModal",
+              animation: "fade",
+            }}
+          />
+          <Stack.Screen
+            name="viewer/[id]"
             options={{
               headerShown: false,
               presentation: "transparentModal",
