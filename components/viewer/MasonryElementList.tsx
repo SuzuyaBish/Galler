@@ -9,9 +9,13 @@ const ITEM_WIDTH = (WINDOW_WIDTH - PARENT_PADDING * 2 - COLUMN_GAP) / 2
 
 interface MasonryElementListProps {
   elements: Element[]
+  scrollEnabled?: boolean
 }
 
-const MasonryElementList: FC<MasonryElementListProps> = ({ elements }) => {
+const MasonryElementList: FC<MasonryElementListProps> = ({
+  elements,
+  scrollEnabled = true,
+}) => {
   return (
     <MasonryFlashList
       data={elements}
@@ -32,7 +36,7 @@ const MasonryElementList: FC<MasonryElementListProps> = ({ elements }) => {
         />
       )}
       keyExtractor={(item) => item.id}
-      estimatedItemSize={ITEM_WIDTH}
+      estimatedItemSize={ITEM_WIDTH + 2}
     />
   )
 }
