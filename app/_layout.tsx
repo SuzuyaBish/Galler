@@ -1,6 +1,6 @@
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { useFonts } from "expo-font"
-import { Stack } from "expo-router"
+import { Stack, usePathname } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
 import "react-native-reanimated"
@@ -24,6 +24,7 @@ configureReanimatedLogger({
 })
 
 export default function RootLayout() {
+  const pathname = usePathname()
   const [loaded] = useFonts({
     SwitzerLight: require("../assets/fonts/Switzer/Switzer-Light.otf"),
     SwitzerRegular: require("../assets/fonts/Switzer/Switzer-Regular.otf"),
@@ -58,7 +59,7 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
-            name="viewer/[id]"
+            name="viewer"
             options={{
               headerShown: false,
               presentation: "transparentModal",
@@ -66,7 +67,7 @@ export default function RootLayout() {
             }}
           />
         </Stack>
-        <BottomActions />
+        {pathname !== "/viewer" && <BottomActions />}
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   )

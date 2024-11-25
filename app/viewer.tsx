@@ -1,21 +1,21 @@
 import { ParentView } from "@/components/StyledComponents"
-import MasonryElementList from "@/components/viewer/MasonryElementList"
 import GestureScrollView from "@/components/viewer/GestureScrollView"
+import MasonryElementList from "@/components/viewer/MasonryElementList"
 import { PARENT_PADDING } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
+import type { Element } from "@/lib/types/state-types"
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet"
 import { observer } from "@legendapp/state/react"
+import { BlurView } from "expo-blur"
 import { Image } from "expo-image"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Share2Icon } from "lucide-react-native"
 import React from "react"
-import { Button, Pressable, View } from "react-native"
-import PagerView from "react-native-pager-view"
+import { Button, Pressable, ScrollView, View } from "react-native"
 import Animated, {
-  useAnimatedProps,
   useAnimatedScrollHandler,
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
 } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -31,31 +31,30 @@ function Viewer() {
   const insets = useSafeAreaInsets()
   const { transitionTag, id } = useLocalSearchParams() as Params
   const elements = state$.elements.get()
-  const pagerRef = React.useRef<PagerView>(null)
+  const scrollViewRef = React.useRef<ScrollView>(null)
 
   const offset = useSharedValue(0)
-  const pagerHeight = WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom
-  const [currentPage, setCurrentPage] = React.useState(
-    elements?.findIndex((element) => element.id === id) ?? 0
+  const imageHeight = WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom
+
+  const handleImagePress = React.useCallback(
+    (element: Element) => {
+      if (!elements) return
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true })
+      offset.value = 0
+      router.setParams({ id: element.id })
+    },
+    [elements, router]
   )
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
-      'worklet';
+      "worklet"
       offset.value = event.contentOffset.y
-    }
+    },
   })
 
-  const handleHorizontalGesture = React.useCallback((direction: "left" | "right") => {
-    if (direction === "left" && currentPage < (elements?.length ?? 0) - 1) {
-      pagerRef.current?.setPage(currentPage + 1)
-    } else if (direction === "right" && currentPage > 0) {
-      pagerRef.current?.setPage(currentPage - 1)
-    }
-  }, [currentPage, elements?.length])
-
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 1 - Math.min(1, offset.value / 300),
+    opacity: 1 - Math.min(1, offset.value / 400),
     transform: [{ translateY: -Math.min(30, offset.value / 10) }],
   }))
 
@@ -66,40 +65,36 @@ function Viewer() {
   if (elements) {
     return (
       <ParentView hasInsets={false} extraInsets={false} className="relative">
-        <View className="absolute left-0 right-0" style={{ top: insets.top }}>
-          <Button title="Back" onPress={() => router.back()} />
-        </View>
+        <BlurView
+          className="absolute left-0 right-0 top-0 z-20"
+          experimentalBlurMethod="dimezisBlurView"
+          intensity={50}
+        >
+          <View style={{ paddingTop: insets.top }}>
+            <Button title="Back" onPress={() => router.back()} />
+          </View>
+        </BlurView>
         <Animated.View
           className="flex-1 items-center justify-center"
           style={animatedStyle}
         >
-          <PagerView
-            ref={pagerRef}
-            style={{
-              flex: 1,
-              height: "100%",
+          <View 
+            style={{ 
+              height: imageHeight,
               width: "100%",
-              maxHeight: pagerHeight,
+              justifyContent: "center",
+              alignItems: "center"
             }}
-            initialPage={elements.findIndex((element) => element.id === id)}
-            onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
           >
-            {elements.map((element) => {
-              return (
-                <AnimatedImage
-                  key={element.id}
-                  contentFit="contain"
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    aspectRatio: (element?.width ?? 1) / (element?.height ?? 1),
-                  }}
-                  sharedTransitionTag={transitionTag}
-                  source={element.uri}
-                />
-              )
-            })}
-          </PagerView>
+            <AnimatedImage
+              contentFit="contain"
+              style={{
+                width: "100%",
+                height: imageHeight,
+              }}
+              source={elements.find((element) => element.id === id)?.uri}
+            />
+          </View>
         </Animated.View>
         <Animated.View
           className="absolute left-0 right-0 flex flex-row items-center justify-center gap-x-3"
@@ -116,19 +111,22 @@ function Viewer() {
           </Pressable>
         </Animated.View>
         <GestureScrollView
+          ref={scrollViewRef}
           onScroll={scrollHandler}
+          scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
           className="absolute bottom-0 left-0 right-0 top-0 flex-1"
           contentContainerStyle={{
+            paddingTop: WINDOW_HEIGHT - insets.bottom,
             paddingBottom: insets.bottom + 30,
           }}
-          style={{
-            paddingTop: WINDOW_HEIGHT - insets.bottom,
-          }}
-          onHorizontalGesture={handleHorizontalGesture}
-          pagerEnabled={offset.value <= 0}
         >
-          <MasonryElementList elements={elements} scrollEnabled={false} />
+          <MasonryElementList
+            elements={elements}
+            scrollEnabled={true}
+            onPress={handleImagePress}
+            enableNavigation={false}
+          />
         </GestureScrollView>
       </ParentView>
     )

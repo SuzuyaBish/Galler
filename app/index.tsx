@@ -67,7 +67,7 @@ function HomeScreen() {
                     transitionTag={`element-${item.id}`}
                     onPress={() =>
                       router.push({
-                        pathname: "/viewer/[id]",
+                        pathname: "/viewer",
                         params: {
                           transitionTag: `element-${item.id}`,
                           id: item.id,
