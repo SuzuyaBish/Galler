@@ -11,11 +11,19 @@ import { Image } from "expo-image"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import { Share2Icon } from "lucide-react-native"
 import React from "react"
-import { Button, Pressable, ScrollView, View } from "react-native"
+import {
+  Button,
+  Pressable,
+  ScrollView,
+  View,
+  useWindowDimensions,
+} from "react-native"
 import Animated, {
+  runOnJS,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -25,16 +33,22 @@ type Params = {
 }
 
 const AnimatedImage = Animated.createAnimatedComponent(Image)
+const DISMISS_THRESHOLD = 100
 
 function Viewer() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const { width: windowWidth } = useWindowDimensions()
   const { transitionTag, id } = useLocalSearchParams() as Params
   const elements = state$.elements.get()
   const scrollViewRef = React.useRef<ScrollView>(null)
+  const [isFullScreen, setIsFullScreen] = React.useState(false)
 
   const offset = useSharedValue(0)
-  const imageHeight = WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom
+  const maxHeight = WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom
+  const fullScreenScale = useSharedValue(1)
+  const fullScreenOpacity = useSharedValue(1)
+  const isDismissing = useSharedValue(false)
 
   const handleImagePress = React.useCallback(
     (element: Element) => {
@@ -46,55 +60,92 @@ function Viewer() {
     [elements, router]
   )
 
+  const toggleFullScreen = React.useCallback(() => {
+    setIsFullScreen((prev) => !prev)
+    fullScreenScale.value = withTiming(isFullScreen ? 1 : 1.1, {
+      duration: 300,
+    })
+    fullScreenOpacity.value = withTiming(isFullScreen ? 1 : 0, {
+      duration: 300,
+    })
+  }, [isFullScreen])
+
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       "worklet"
       offset.value = event.contentOffset.y
+      if (event.contentOffset.y < -DISMISS_THRESHOLD && !isDismissing.value) {
+        isDismissing.value = true
+        runOnJS(router.back)()
+      }
     },
   })
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 1 - Math.min(1, offset.value / 400),
-    transform: [{ translateY: -Math.min(30, offset.value / 10) }],
+    opacity: 1 - Math.min(1, Math.abs(offset.value) / 400),
+    transform: [
+      { translateY: Math.min(30, Math.abs(offset.value) / 10) },
+      { scale: fullScreenScale.value },
+    ],
   }))
 
   const buttonStyle = useAnimatedStyle(() => ({
-    opacity: 1 - Math.min(1, offset.value / 100),
+    opacity: Math.min(
+      1 - Math.abs(offset.value) / 100,
+      fullScreenOpacity.value
+    ),
+  }))
+
+  const uiStyle = useAnimatedStyle(() => ({
+    opacity: fullScreenOpacity.value,
   }))
 
   if (elements) {
+    const selectedElement = elements.find((element) => element.id === id)
+    if (!selectedElement) return null
+
+    const aspectRatio = selectedElement.width / selectedElement.height
+    const displayWidth = windowWidth
+    const displayHeight = Math.min(maxHeight, windowWidth / aspectRatio)
+
     return (
       <ParentView hasInsets={false} extraInsets={false} className="relative">
-        <BlurView
-          className="absolute left-0 right-0 top-0 z-20"
-          experimentalBlurMethod="dimezisBlurView"
-          intensity={50}
-        >
-          <View style={{ paddingTop: insets.top }}>
-            <Button title="Back" onPress={() => router.back()} />
-          </View>
-        </BlurView>
+        <Animated.View style={uiStyle}>
+          <BlurView
+            className="absolute left-0 right-0 top-0 z-20"
+            experimentalBlurMethod="dimezisBlurView"
+            intensity={50}
+          >
+            <View style={{ paddingTop: insets.top }}>
+              <Button title="Back" onPress={() => router.back()} />
+            </View>
+          </BlurView>
+        </Animated.View>
         <Animated.View
           className="flex-1 items-center justify-center"
           style={animatedStyle}
         >
-          <View 
-            style={{ 
-              height: imageHeight,
-              width: "100%",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <AnimatedImage
-              contentFit="contain"
+          <Pressable onPress={toggleFullScreen}>
+            <View
               style={{
-                width: "100%",
-                height: imageHeight,
+                width: displayWidth,
+                height: displayHeight,
+                justifyContent: "center",
+                alignItems: "center",
               }}
-              source={elements.find((element) => element.id === id)?.uri}
-            />
-          </View>
+            >
+              <AnimatedImage
+                contentFit="contain"
+                style={{
+                  width: displayWidth,
+                  height: displayHeight,
+                  backgroundColor: "transparent",
+                }}
+                sharedTransitionTag={transitionTag}
+                source={selectedElement.uri}
+              />
+            </View>
+          </Pressable>
         </Animated.View>
         <Animated.View
           className="absolute left-0 right-0 flex flex-row items-center justify-center gap-x-3"
@@ -121,12 +172,14 @@ function Viewer() {
             paddingBottom: insets.bottom + 30,
           }}
         >
-          <MasonryElementList
-            elements={elements}
-            scrollEnabled={true}
-            onPress={handleImagePress}
-            enableNavigation={false}
-          />
+          <Animated.View style={uiStyle}>
+            <MasonryElementList
+              elements={elements}
+              scrollEnabled={true}
+              onPress={handleImagePress}
+              enableNavigation={false}
+            />
+          </Animated.View>
         </GestureScrollView>
       </ParentView>
     )
