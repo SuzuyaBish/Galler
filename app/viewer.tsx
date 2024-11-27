@@ -106,7 +106,7 @@ function Viewer() {
               onPress={() => router.back()}
               className="flex items-center justify-center py-2 pr-6"
             >
-              <ChevronLeftIcon size={32} />
+              <ChevronLeftIcon size={32} color={Colors.icon} />
             </Pressable>
             <Text className="text-xl">
               {format(selectedElement.createdAt, "PP")}
