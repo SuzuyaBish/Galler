@@ -95,6 +95,8 @@ function CreateLanding({ onDone }: { onDone: () => void }) {
               if (isDone) {
                 onDone()
                 bottomSheetRef.current?.dismiss()
+              } else {
+                bottomSheetRef.current?.dismiss()
               }
             }}
           />

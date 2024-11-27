@@ -63,11 +63,6 @@ export default function BottomActions() {
         handleIndicatorStyle={{
           backgroundColor: Colors.mutedText,
         }}
-        detached
-        bottomInset={insets.bottom}
-        style={{
-          marginHorizontal: PARENT_PADDING * 2,
-        }}
         animationConfigs={{
           stiffness: 1000,
           damping: 500,
@@ -95,6 +90,7 @@ export default function BottomActions() {
           style={{
             paddingHorizontal: PARENT_PADDING + 5,
             paddingVertical: PARENT_PADDING,
+            paddingBottom: insets.bottom,
           }}
         >
           <CreateLanding onDone={() => bottomSheetRef.current?.dismiss()} />
