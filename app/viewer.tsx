@@ -10,6 +10,7 @@ import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet"
 import { observer } from "@legendapp/state/react"
 import { format } from "date-fns"
 import { BlurView } from "expo-blur"
+import * as Haptics from "expo-haptics"
 import { Image } from "expo-image"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import {
@@ -151,7 +152,7 @@ function Viewer() {
         >
           <Pressable
             onPress={async () => {
-              console.log("Pressed")
+              Haptics.selectionAsync()
               await share(selectedElement.uri)
             }}
             className="flex size-14 items-center justify-center rounded-full"
@@ -161,10 +162,18 @@ function Viewer() {
           >
             <ShareIcon color={Colors.icon} size={18} />
           </Pressable>
-          <Pressable className="flex h-14 w-32 items-center justify-center rounded-full bg-white">
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync()
+            }}
+            className="flex h-14 w-32 items-center justify-center rounded-full bg-white"
+          >
             <PlusIcon color="black" size={18} />
           </Pressable>
           <Pressable
+            onPress={() => {
+              Haptics.selectionAsync()
+            }}
             className="flex size-14 items-center justify-center rounded-full"
             style={{
               backgroundColor: Colors.mutedBackground,
