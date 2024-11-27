@@ -1,6 +1,7 @@
 import { ParentView, Text } from "@/components/StyledComponents"
 import GestureScrollView from "@/components/viewer/GestureScrollView"
 import MasonryElementList from "@/components/viewer/MasonryElementList"
+import { Colors } from "@/constants/colors"
 import { PARENT_PADDING } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
 import type { Element } from "@/lib/types/state-types"
@@ -10,7 +11,12 @@ import { format } from "date-fns"
 import { BlurView } from "expo-blur"
 import { Image } from "expo-image"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { ChevronLeftIcon, Share2Icon } from "lucide-react-native"
+import {
+  ChevronLeftIcon,
+  MoreHorizontalIcon,
+  PlusIcon,
+  ShareIcon,
+} from "lucide-react-native"
 import React from "react"
 import { Pressable, ScrollView, View, useWindowDimensions } from "react-native"
 import Animated, {
@@ -142,8 +148,24 @@ function Viewer() {
             },
           ]}
         >
-          <Pressable>
-            <Share2Icon />
+          <Pressable
+            className="flex size-14 items-center justify-center rounded-full"
+            style={{
+              backgroundColor: Colors.mutedBackground,
+            }}
+          >
+            <ShareIcon color={Colors.icon} size={18} />
+          </Pressable>
+          <Pressable className="flex h-14 w-32 items-center justify-center rounded-full bg-white">
+            <PlusIcon color="black" size={18} />
+          </Pressable>
+          <Pressable
+            className="flex size-14 items-center justify-center rounded-full"
+            style={{
+              backgroundColor: Colors.mutedBackground,
+            }}
+          >
+            <MoreHorizontalIcon color={Colors.icon} size={18} />
           </Pressable>
         </Animated.View>
         <GestureScrollView
