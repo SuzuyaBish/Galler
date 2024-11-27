@@ -5,9 +5,10 @@ import { Colors } from "@/constants/colors"
 import { PARENT_PADDING } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
 import type { Element } from "@/lib/types/state-types"
-import { share } from "@/lib/utils"
+import { deleteElementFromFileSystem, share } from "@/lib/utils"
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet"
 import { observer } from "@legendapp/state/react"
+import Color from "color"
 import { format } from "date-fns"
 import { BlurView } from "expo-blur"
 import * as Haptics from "expo-haptics"
@@ -15,9 +16,9 @@ import { Image } from "expo-image"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import {
   ChevronLeftIcon,
-  MoreHorizontalIcon,
   PlusIcon,
   ShareIcon,
+  TrashIcon,
 } from "lucide-react-native"
 import React from "react"
 import { Pressable, ScrollView, View, useWindowDimensions } from "react-native"
@@ -171,15 +172,28 @@ function Viewer() {
             <PlusIcon color="black" size={18} />
           </Pressable>
           <Pressable
-            onPress={() => {
+            onPress={async () => {
               Haptics.selectionAsync()
+              await deleteElementFromFileSystem(selectedElement.uri).then(
+                () => {
+                  const foundElement = state$.elements.find(
+                    (e) => e.id.peek() === selectedElement.id
+                  )
+                  if (foundElement) {
+                    foundElement.delete()
+                  }
+                  router.back()
+                }
+              )
             }}
             className="flex size-14 items-center justify-center rounded-full"
             style={{
-              backgroundColor: Colors.mutedBackground,
+              backgroundColor: Color(Colors.redColor).alpha(0.1).string(),
+              borderColor: Color(Colors.redColor).alpha(0.2).string(),
+              borderWidth: 1,
             }}
           >
-            <MoreHorizontalIcon color={Colors.icon} size={18} />
+            <TrashIcon color={Colors.redColor} size={18} />
           </Pressable>
         </Animated.View>
         <GestureScrollView

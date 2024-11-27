@@ -4,6 +4,7 @@ import { Stack, usePathname } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
 import "react-native-reanimated"
+import { Toaster } from "sonner-native"
 import "../global.css"
 
 import BottomActions from "@/components/BottomActions"
@@ -68,6 +69,7 @@ export default function RootLayout() {
           />
         </Stack>
         {pathname !== "/viewer" && <BottomActions />}
+        <Toaster />
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   )
