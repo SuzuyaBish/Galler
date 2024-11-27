@@ -5,6 +5,7 @@ import { Colors } from "@/constants/colors"
 import { PARENT_PADDING } from "@/constants/dimensions"
 import { state$ } from "@/lib/store/state"
 import type { Element } from "@/lib/types/state-types"
+import { share } from "@/lib/utils"
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet"
 import { observer } from "@legendapp/state/react"
 import { format } from "date-fns"
@@ -139,7 +140,7 @@ function Viewer() {
           </View>
         </Animated.View>
         <Animated.View
-          className="absolute left-0 right-0 flex flex-row items-center justify-center gap-x-3"
+          className="absolute left-0 right-0 z-10 flex flex-row items-center justify-center gap-x-3"
           style={[
             buttonStyle,
             {
@@ -149,6 +150,10 @@ function Viewer() {
           ]}
         >
           <Pressable
+            onPress={async () => {
+              console.log("Pressed")
+              await share(selectedElement.uri)
+            }}
             className="flex size-14 items-center justify-center rounded-full"
             style={{
               backgroundColor: Colors.mutedBackground,
