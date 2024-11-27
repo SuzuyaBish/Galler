@@ -23,7 +23,6 @@ import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
 } from "react-native-reanimated"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 
@@ -42,12 +41,9 @@ function Viewer() {
   const { transitionTag, id } = useLocalSearchParams() as Params
   const elements = state$.elements.get()
   const scrollViewRef = React.useRef<ScrollView>(null)
-  const [isFullScreen, setIsFullScreen] = React.useState(false)
 
   const offset = useSharedValue(0)
   const maxHeight = WINDOW_HEIGHT * 0.75 - insets.top - insets.bottom
-  const fullScreenScale = useSharedValue(1)
-  const fullScreenOpacity = useSharedValue(1)
   const isDismissing = useSharedValue(false)
 
   const handleImagePress = React.useCallback(
@@ -59,16 +55,6 @@ function Viewer() {
     },
     [elements, router]
   )
-
-  const toggleFullScreen = React.useCallback(() => {
-    setIsFullScreen((prev) => !prev)
-    fullScreenScale.value = withTiming(isFullScreen ? 1 : 1.1, {
-      duration: 300,
-    })
-    fullScreenOpacity.value = withTiming(isFullScreen ? 1 : 0, {
-      duration: 300,
-    })
-  }, [isFullScreen])
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -83,21 +69,11 @@ function Viewer() {
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: 1 - Math.min(1, Math.abs(offset.value) / 400),
-    transform: [
-      { translateY: Math.min(30, Math.abs(offset.value) / 10) },
-      { scale: fullScreenScale.value },
-    ],
+    transform: [{ translateY: Math.min(30, Math.abs(offset.value) / 10) }],
   }))
 
   const buttonStyle = useAnimatedStyle(() => ({
-    opacity: Math.min(
-      1 - Math.abs(offset.value) / 100,
-      fullScreenOpacity.value
-    ),
-  }))
-
-  const uiStyle = useAnimatedStyle(() => ({
-    opacity: fullScreenOpacity.value,
+    opacity: Math.min(1 - Math.abs(offset.value) / 100),
   }))
 
   if (elements) {
@@ -110,7 +86,7 @@ function Viewer() {
 
     return (
       <ParentView hasInsets={false} extraInsets={false} className="relative">
-        <Animated.View style={uiStyle}>
+        <Animated.View>
           <BlurView
             className="absolute left-0 right-0 top-0 z-20"
             experimentalBlurMethod="dimezisBlurView"
@@ -125,27 +101,25 @@ function Viewer() {
           className="flex-1 items-center justify-center"
           style={animatedStyle}
         >
-          <Pressable onPress={toggleFullScreen}>
-            <View
+          <View
+            style={{
+              width: displayWidth,
+              height: displayHeight,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <AnimatedImage
+              contentFit="contain"
               style={{
                 width: displayWidth,
                 height: displayHeight,
-                justifyContent: "center",
-                alignItems: "center",
+                backgroundColor: "transparent",
               }}
-            >
-              <AnimatedImage
-                contentFit="contain"
-                style={{
-                  width: displayWidth,
-                  height: displayHeight,
-                  backgroundColor: "transparent",
-                }}
-                sharedTransitionTag={transitionTag}
-                source={selectedElement.uri}
-              />
-            </View>
-          </Pressable>
+              sharedTransitionTag={transitionTag}
+              source={selectedElement.uri}
+            />
+          </View>
         </Animated.View>
         <Animated.View
           className="absolute left-0 right-0 flex flex-row items-center justify-center gap-x-3"
@@ -172,7 +146,7 @@ function Viewer() {
             paddingBottom: insets.bottom + 30,
           }}
         >
-          <Animated.View style={uiStyle}>
+          <Animated.View>
             <MasonryElementList
               elements={elements}
               scrollEnabled={true}

@@ -37,6 +37,7 @@ export const state$ = observable({
           id: generateId(),
           uri: newUri,
           folderId: "",
+          createdAt: new Date(),
         })
       }
     } catch (error) {

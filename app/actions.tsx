@@ -97,6 +97,23 @@ function RandomScreen() {
               </Pressable>
             </Animated.View>
           )}
+          {!movingFolder && !isDeleting && (
+            <Animated.View
+              layout={LinearTransition}
+              entering={FadeIn}
+              exiting={FadeOut}
+            >
+              <Pressable
+                className="flex-row items-center gap-x-7 py-5"
+                onPress={async () => await share(element!.uri)}
+              >
+                <ShareIcon color={Colors.icon} />
+                <Text color={Colors.icon} className="text-xl">
+                  Share
+                </Text>
+              </Pressable>
+            </Animated.View>
+          )}
           {!isDeleting && (
             <Animated.View
               layout={LinearTransition}
@@ -114,23 +131,6 @@ function RandomScreen() {
                 )}
                 <Text color={Colors.icon} className="text-xl">
                   Move
-                </Text>
-              </Pressable>
-            </Animated.View>
-          )}
-          {!movingFolder && !isDeleting && (
-            <Animated.View
-              layout={LinearTransition}
-              entering={FadeIn}
-              exiting={FadeOut}
-            >
-              <Pressable
-                className="flex-row items-center gap-x-7 py-5"
-                onPress={async () => await share(element!.uri)}
-              >
-                <ShareIcon color={Colors.icon} />
-                <Text color={Colors.icon} className="text-xl">
-                  Share
                 </Text>
               </Pressable>
             </Animated.View>

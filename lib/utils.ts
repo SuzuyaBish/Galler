@@ -4,6 +4,7 @@ import { Directory } from "expo-file-system/next"
 import * as Sharing from "expo-sharing"
 import { twMerge } from "tailwind-merge"
 import { FontType } from "./types/font-types"
+import type { Element } from "./types/state-types"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -61,4 +62,10 @@ export const share = async (uri: string) => {
 
 export const deleteElementFromFileSystem = async (uri: string) => {
   await FileSystem.deleteAsync(uri)
+}
+
+export const sortElementsByDate = (elements: Element[]) => {
+  return elements.sort((a, b) => {
+    return b.createdAt.getTime() - a.createdAt.getTime()
+  })
 }

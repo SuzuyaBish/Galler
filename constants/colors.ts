@@ -4,7 +4,7 @@ const tintColorDark = "#fff"
 export const Colors = {
   text: "#ECEDEE",
   mutedText: "#ACADAD",
-  background: "#0D0D0D",
+  background: "#0F0F0F",
   tint: tintColorDark,
   icon: "#ABABAB",
   mutedBackground: "#242424",
