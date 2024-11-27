@@ -1,4 +1,4 @@
-import { ParentView } from "@/components/StyledComponents"
+import { ParentView, Text } from "@/components/StyledComponents"
 import GestureScrollView from "@/components/viewer/GestureScrollView"
 import MasonryElementList from "@/components/viewer/MasonryElementList"
 import { PARENT_PADDING } from "@/constants/dimensions"
@@ -6,18 +6,13 @@ import { state$ } from "@/lib/store/state"
 import type { Element } from "@/lib/types/state-types"
 import { WINDOW_HEIGHT } from "@gorhom/bottom-sheet"
 import { observer } from "@legendapp/state/react"
+import { format } from "date-fns"
 import { BlurView } from "expo-blur"
 import { Image } from "expo-image"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { Share2Icon } from "lucide-react-native"
+import { ChevronLeftIcon, Share2Icon } from "lucide-react-native"
 import React from "react"
-import {
-  Button,
-  Pressable,
-  ScrollView,
-  View,
-  useWindowDimensions,
-} from "react-native"
+import { Pressable, ScrollView, View, useWindowDimensions } from "react-native"
 import Animated, {
   runOnJS,
   useAnimatedScrollHandler,
@@ -86,17 +81,33 @@ function Viewer() {
 
     return (
       <ParentView hasInsets={false} extraInsets={false} className="relative">
-        <Animated.View>
-          <BlurView
-            className="absolute left-0 right-0 top-0 z-20"
-            experimentalBlurMethod="dimezisBlurView"
-            intensity={50}
+        <BlurView
+          className="absolute left-0 right-0 top-0 z-20"
+          experimentalBlurMethod="dimezisBlurView"
+          intensity={50}
+        >
+          <View
+            style={{
+              paddingTop: insets.top,
+              paddingBottom: 10,
+              paddingHorizontal: PARENT_PADDING,
+            }}
+            className="flex flex-row items-center justify-between"
           >
-            <View style={{ paddingTop: insets.top }}>
-              <Button title="Back" onPress={() => router.back()} />
-            </View>
-          </BlurView>
-        </Animated.View>
+            <Pressable
+              onPress={() => router.back()}
+              className="flex items-center justify-center py-2 pr-6"
+            >
+              <ChevronLeftIcon size={32} />
+            </Pressable>
+            <Text className="text-xl">
+              {format(selectedElement.createdAt, "PP")}
+            </Text>
+            <Pressable className="flex items-center justify-center py-2 pr-6">
+              <ChevronLeftIcon size={32} color="transparent" />
+            </Pressable>
+          </View>
+        </BlurView>
         <Animated.View
           className="flex-1 items-center justify-center"
           style={animatedStyle}
